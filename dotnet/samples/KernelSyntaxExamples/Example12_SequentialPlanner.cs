@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Azure.Identity;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.Memory;
@@ -68,12 +69,20 @@ internal static class Example12_SequentialPlanner
     private static async Task PoetrySamplesAsync()
     {
         Console.WriteLine("======== Sequential Planner - Create and Execute Poetry Plan ========");
+
+        var builder = new KernelBuilder();
+
+        var azureEndpoint = "https://eastus-shared-prd-cs.openai.azure.com";
+
+        var model = "gpt-35-turbo";
+        //"gpt-4";
+        //"gpt-35-turbo";
+
+        var embeding_model = "text-embedding-ada-002";
+
         var kernel = new KernelBuilder()
             .WithLoggerFactory(ConsoleLogger.LoggerFactory)
-            .WithAzureChatCompletionService(
-                TestConfiguration.AzureOpenAI.ChatDeploymentName,
-                TestConfiguration.AzureOpenAI.Endpoint,
-                TestConfiguration.AzureOpenAI.ApiKey)
+            .WithAzureChatCompletionService(model, azureEndpoint, new DefaultAzureCredential())
             .Build();
 
         string folder = RepoFiles.SampleSkillsPath();
@@ -274,18 +283,20 @@ internal static class Example12_SequentialPlanner
 
     private static IKernel InitializeKernelWithMemory()
     {
+        var azureEndpoint = "https://eastus-shared-prd-cs.openai.azure.com";
+
+        var model = "gpt-35-turbo";
+        //"gpt-4";
+        //"gpt-35-turbo";
+
+        var embeding_model = "text-embedding-ada-002";
+
         // IMPORTANT: Register an embedding generation service and a memory store. The Planner will
         // use these to generate and store embeddings for the function descriptions.
         var kernel = new KernelBuilder()
             .WithLoggerFactory(ConsoleLogger.LoggerFactory)
-            .WithAzureChatCompletionService(
-                TestConfiguration.AzureOpenAI.ChatDeploymentName,
-                TestConfiguration.AzureOpenAI.Endpoint,
-                TestConfiguration.AzureOpenAI.ApiKey)
-            .WithAzureTextEmbeddingGenerationService(
-                TestConfiguration.AzureOpenAIEmbeddings.DeploymentName,
-                TestConfiguration.AzureOpenAIEmbeddings.Endpoint,
-                TestConfiguration.AzureOpenAIEmbeddings.ApiKey)
+            .WithAzureChatCompletionService(model, azureEndpoint, new DefaultAzureCredential())
+            .WithAzureTextEmbeddingGenerationService(embeding_model, azureEndpoint, new DefaultAzureCredential())
             .WithMemoryStorage(new VolatileMemoryStore())
             .Build();
 
@@ -294,15 +305,19 @@ internal static class Example12_SequentialPlanner
 
     private static ISemanticTextMemory GetMemory(IKernel? kernel = null)
     {
+        var azureEndpoint = "https://eastus-shared-prd-cs.openai.azure.com";
+
+        var model = "gpt-35-turbo";
+        //"gpt-4";
+        //"gpt-35-turbo";
+
+        var embeding_model = "text-embedding-ada-002";
         if (kernel is not null)
         {
             return kernel.Memory;
         }
         var memoryStorage = new VolatileMemoryStore();
-        var textEmbeddingGenerator = new Microsoft.SemanticKernel.Connectors.AI.OpenAI.TextEmbedding.AzureTextEmbeddingGeneration(
-            modelId: TestConfiguration.AzureOpenAIEmbeddings.DeploymentName,
-            endpoint: TestConfiguration.AzureOpenAIEmbeddings.Endpoint,
-            apiKey: TestConfiguration.AzureOpenAIEmbeddings.ApiKey);
+        var textEmbeddingGenerator = new Microsoft.SemanticKernel.Connectors.AI.OpenAI.TextEmbedding.AzureTextEmbeddingGeneration(embeding_model, azureEndpoint, new DefaultAzureCredential());
         var memory = new SemanticTextMemory(memoryStorage, textEmbeddingGenerator);
         return memory;
     }

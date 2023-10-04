@@ -78,7 +78,7 @@ public static class Example08_RetryHandler
         return Kernel.Builder
                     .WithLoggerFactory(InfoLogger.LoggerFactory)
                     // OpenAI settings - you can set the OpenAI.ApiKey to an invalid value to see the retry policy in play
-                    .WithOpenAIChatCompletionService(TestConfiguration.OpenAI.ChatModelId, "BAD_KEY");
+                    .WithOpenAIChatCompletionService("gpt-35-turbo", "BAD_KEY");
     }
 
     private static AsyncPolicy<HttpResponseMessage> GetPollyPolicy(ILoggerFactory? logger)

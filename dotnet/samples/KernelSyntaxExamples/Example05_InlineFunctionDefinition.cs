@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Azure.Identity;
 using Microsoft.SemanticKernel;
 using RepoUtils;
 
@@ -13,13 +14,6 @@ public static class Example05_InlineFunctionDefinition
         Console.WriteLine("======== Inline Function Definition ========");
 
         string openAIModelId = TestConfiguration.OpenAI.ChatModelId;
-        string openAIApiKey = TestConfiguration.OpenAI.ApiKey;
-
-        if (openAIModelId == null || openAIApiKey == null)
-        {
-            Console.WriteLine("OpenAI credentials not found. Skipping example.");
-            return;
-        }
 
         /*
          * Example: normally you would place prompt templates in a folder to separate
@@ -27,26 +21,32 @@ public static class Example05_InlineFunctionDefinition
          *          function inline if you like.
          */
 
+        var builder = new KernelBuilder();
+
+        var azureEndpoint = "https://eastus-shared-prd-cs.openai.azure.com";
+
+        var model = "gpt-35-turbo1-1";
+        //"gpt-4";
+        //"gpt-35-turbo";
+
         IKernel kernel = new KernelBuilder()
             .WithLoggerFactory(ConsoleLogger.LoggerFactory)
-            .WithOpenAIChatCompletionService(
-                modelId: openAIModelId,
-                apiKey: openAIApiKey)
+            .WithAzureChatCompletionService(model, azureEndpoint, new DefaultAzureCredential())
             .Build();
 
         // Function defined using few-shot design pattern
         const string FunctionDefinition = @"
-Generate a creative reason or excuse for the given event.
-Be creative and be funny. Let your imagination run wild.
+            Generate a creative reason or excuse for the given event.
+            Be creative and be funny. Let your imagination run wild.
 
-Event: I am running late.
-Excuse: I was being held ransom by giraffe gangsters.
+            Event: I am running late.
+            Excuse: I was being held ransom by giraffe gangsters.
 
-Event: I haven't been to the gym for a year
-Excuse: I've been too busy training my pet dragon.
+            Event: I haven't been to the gym for a year
+            Excuse: I've been too busy training my pet dragon.
 
-Event: {{$input}}
-";
+            Event: {{$input}}
+            ";
 
         var excuseFunction = kernel.CreateSemanticFunction(FunctionDefinition, maxTokens: 100, temperature: 0.4, topP: 1);
 

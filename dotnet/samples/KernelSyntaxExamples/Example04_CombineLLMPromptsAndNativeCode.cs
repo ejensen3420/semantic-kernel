@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Azure.Identity;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Skills.Web;
 using Microsoft.SemanticKernel.Skills.Web.Bing;
@@ -14,17 +15,26 @@ public static class Example04_CombineLLMPromptsAndNativeCode
     {
         Console.WriteLine("======== LLMPrompts ========");
 
-        string openAIApiKey = TestConfiguration.OpenAI.ApiKey;
+        //string openAIApiKey = TestConfiguration.OpenAI.ApiKey;
 
-        if (openAIApiKey == null)
-        {
-            Console.WriteLine("OpenAI credentials not found. Skipping example.");
-            return;
-        }
+        //if (openAIApiKey == null)
+        //{
+        //    Console.WriteLine("OpenAI credentials not found. Skipping example.");
+        //    return;
+        //}
+        var builder = new KernelBuilder();
+
+        var azureEndpoint = "https://eastus-shared-prd-cs.openai.azure.com";
+
+        var model = "gpt-35-turbo";
+        //"gpt-4";
+        //"gpt-35-turbo";
+
+        var embeding_model = "text-embedding-ada-002";
 
         IKernel kernel = new KernelBuilder()
             .WithLoggerFactory(ConsoleLogger.LoggerFactory)
-            .WithOpenAIChatCompletionService(TestConfiguration.OpenAI.ChatModelId, openAIApiKey)
+            .WithAzureChatCompletionService(model, azureEndpoint, new DefaultAzureCredential())
             .Build();
 
         // Load native skill

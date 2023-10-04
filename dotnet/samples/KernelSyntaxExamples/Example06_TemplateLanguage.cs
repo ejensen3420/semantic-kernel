@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Azure.Identity;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Skills.Core;
 using Microsoft.SemanticKernel.TemplateEngine.Prompt;
@@ -18,20 +19,26 @@ public static class Example06_TemplateLanguage
     {
         Console.WriteLine("======== TemplateLanguage ========");
 
-        string openAIModelId = TestConfiguration.OpenAI.ChatModelId;
-        string openAIApiKey = TestConfiguration.OpenAI.ApiKey;
+        //string openAIModelId = TestConfiguration.OpenAI.ChatModelId;
+        //string openAIApiKey = TestConfiguration.OpenAI.ApiKey;
 
-        if (openAIModelId == null || openAIApiKey == null)
-        {
-            Console.WriteLine("OpenAI credentials not found. Skipping example.");
-            return;
-        }
+        var azureEndpoint = "https://eastus-shared-prd-cs.openai.azure.com";
+
+        var model = "gpt-35-turbo";
+        //"gpt-4";
+        //"gpt-35-turbo";
+
+        var embeding_model = "text-embedding-ada-002";
+
+        //if (openAIModelId == null || openAIApiKey == null)
+        //{
+        //    Console.WriteLine("OpenAI credentials not found. Skipping example.");
+        //    return;
+        //}
 
         IKernel kernel = Kernel.Builder
             .WithLoggerFactory(ConsoleLogger.LoggerFactory)
-            .WithOpenAIChatCompletionService(
-                modelId: openAIModelId,
-                apiKey: openAIApiKey)
+            .WithAzureChatCompletionService(model, azureEndpoint, new DefaultAzureCredential())
             .Build();
 
         // Load native skill into the kernel skill collection, sharing its functions with prompt templates

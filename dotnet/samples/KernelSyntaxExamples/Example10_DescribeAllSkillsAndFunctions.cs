@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Azure.Identity;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.SemanticKernel.Skills.Core;
@@ -22,10 +23,16 @@ public static class Example10_DescribeAllSkillsAndFunctions
     {
         Console.WriteLine("======== Describe all skills and functions ========");
 
+        var azureEndpoint = "https://eastus-shared-prd-cs.openai.azure.com";
+
+        var model = "gpt-35-turbo";
+        //"gpt-4";
+        //"gpt-35-turbo";
+
+        var embeding_model = "text-embedding-ada-002";
+
         var kernel = Kernel.Builder
-            .WithOpenAIChatCompletionService(
-                modelId: TestConfiguration.OpenAI.ChatModelId,
-                apiKey: TestConfiguration.OpenAI.ApiKey)
+            .WithAzureChatCompletionService(model, azureEndpoint, new DefaultAzureCredential())
             .Build();
 
         // Import a native skill

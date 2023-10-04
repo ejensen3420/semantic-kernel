@@ -4,6 +4,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Azure.Identity;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
@@ -18,9 +19,19 @@ public static class Example09_FunctionTypes
 
         var fakeContext = new SKContext(loggerFactory: ConsoleLogger.LoggerFactory);
 
+        var builder = new KernelBuilder();
+
+        var azureEndpoint = "https://eastus-shared-prd-cs.openai.azure.com";
+
+        var model = "gpt-35-turbo";
+        //"gpt-4";
+        //"gpt-35-turbo";
+
+        var embeding_model = "text-embedding-ada-002";
+
         var kernel = Kernel.Builder
             .WithLoggerFactory(ConsoleLogger.LoggerFactory)
-            .WithOpenAIChatCompletionService(TestConfiguration.OpenAI.ChatModelId, TestConfiguration.OpenAI.ApiKey)
+            .WithAzureChatCompletionService(model, azureEndpoint, new DefaultAzureCredential())
             .Build();
 
         // Load native skill into the kernel skill collection, sharing its functions with prompt templates
